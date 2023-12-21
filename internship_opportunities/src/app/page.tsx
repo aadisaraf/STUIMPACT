@@ -113,13 +113,15 @@
 // }
 
 
-import DropDownMenu from '/components/dropDownMenu';
+import ScrapingBee from '../../components/ScrapingBee.jsx'
 const Home = ()=>{
   return (
-    <div>
+    <nav>
       <h1>Internship Opportunities</h1>
+      <ScrapingBee />
       {/*input all other components*/}
-      <DropDownMenu/>
-    </div>
-  );
+    </nav>
+  );  
 };
+
+export default Home
