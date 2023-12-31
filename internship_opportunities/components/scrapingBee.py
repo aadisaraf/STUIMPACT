@@ -19,19 +19,21 @@ def send_request():
 
         # Extract and print the URLs
         for result in data.get("organic_results", []):
-            url = result.get("url")
-            urls.append(url)
-
-            screenResponse = requests.get(
-                url,
+            urls = result.get("url")
+            response = requests.get(
+                url='https://app.scrapingbee.com/api/v1/',
                 params={
-                    'screenshot':True,
-                }
+                    'api_key': '85APE50M3YAGCTXNI6HG33YA3WQXMH9G0PD9QJMP8UN5PRULINX3GME2BYV4DK5M1MOMXQDK11IJPG4Z',
+                    'url': urls, 
+                    'screenshot_full_page': 'true', 
+            },
+        
             )
+        
 
-            if screenResponse.ok:
-                with open("./screenshot.png", "wb") as f:
-                    f.write(screenResponse.content)
+
+send_request()
+
 
   
             
