@@ -4,7 +4,7 @@ import requests
 from scrapingbee import ScrapingBeeClient
 
 
-client = ScrapingBeeClient(api_key='NH07W9TZ6UWUI3YGDKE27YH736KMTFTLRN2PDK8G057JWGJ03ABA8DT7J0XVEY33JYTZ7P91XI8VVKPY')
+client = ScrapingBeeClient(api_key='F3MF64TZTX1GFU4HZWHNVT6SE7XUOL4OXYZJRU6ZJSJMG4R8VRT5CZ9G85RH4XFVZ2DLCTMGS18DF27J')
 
 app = Flask(__name__)
 CORS(app)  # Enable CORS for all routes
@@ -37,9 +37,9 @@ def save_data():
         response = requests.get(
             url="https://app.scrapingbee.com/api/v1/store/google",
             params={
-                "api_key": "NH07W9TZ6UWUI3YGDKE27YH736KMTFTLRN2PDK8G057JWGJ03ABA8DT7J0XVEY33JYTZ7P91XI8VVKPY",
+                "api_key": "F3MF64TZTX1GFU4HZWHNVT6SE7XUOL4OXYZJRU6ZJSJMG4R8VRT5CZ9G85RH4XFVZ2DLCTMGS18DF27J",
                 "search": finalSearchQuery,
-                "nb_results": "5"  # Set the number of results to 5
+                "nb_results": "10"  # Set the number of results to 5 plus an error margin which will be used later in code
             },
         )
         print('Response HTTP Status Code:', response.status_code)
@@ -50,25 +50,36 @@ def save_data():
 
             i = 0
 
+            
+            blacklist = ["linkedin.com"]#BLACKLIST, ADD AND REMOVE AS NECESSARY
+            TAKEN_SITE_SCREENSHOTS = 0
+
             # Extract and print the URLs
             for result in data.get("organic_results", []):
                 urls = result.get("url")
+                
                 screen = client.get(
                     url=urls,
                     params={
                         "screenshot_full_page": "true",
                     },
                 )
-
+                for blacklisted_element in blacklist:
+                    if TAKEN_SITE_SCREENSHOTS==5:
+                        break
+                    if blacklisted_element in screen.url:
+                        print("ITEM BLACKLISTED")
+                        continue #stops code from taking screenshots of these pages, and ensures uses another url, which is provided from the error margin itself
+                    
                 if screen.status_code == 200:
                     with open('screenshot{}.png'.format(i), 'wb') as f:
                         i += 1
                         f.write(screen.content)
                     print("Image saved")
-
+                    TAKEN_SITE_SCREENSHOTS +=1
                 else:
                     print("Failed to save", screen.status_code)
-            
+                
         print(finalSearchQuery)
         return jsonify({'message': 'Data received successfully.'}), 200
     except Exception as e:
