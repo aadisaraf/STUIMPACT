@@ -2,9 +2,10 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS  # Import the CORS extension
 import requests
 from scrapingbee import ScrapingBeeClient
+from threading import Thread
 
-
-client = ScrapingBeeClient(api_key='F3MF64TZTX1GFU4HZWHNVT6SE7XUOL4OXYZJRU6ZJSJMG4R8VRT5CZ9G85RH4XFVZ2DLCTMGS18DF27J')
+API_KEY = '7W07026UP5TUAVWMQB2L59FJCWI8W0DSNXMU6X6CZBWNYPSHSD9OFYWTP6KJ6G24K75Q937FBBRUUJOY'
+client = ScrapingBeeClient(api_key=API_KEY)
 
 app = Flask(__name__)
 CORS(app)  # Enable CORS for all routes
@@ -37,13 +38,34 @@ def save_data():
         response = requests.get(
             url="https://app.scrapingbee.com/api/v1/store/google",
             params={
-                "api_key": "F3MF64TZTX1GFU4HZWHNVT6SE7XUOL4OXYZJRU6ZJSJMG4R8VRT5CZ9G85RH4XFVZ2DLCTMGS18DF27J",
+                "api_key": API_KEY,
                 "search": finalSearchQuery,
-                "nb_results": "10"  # Set the number of results to 5 plus an error margin which will be used later in code
+                "nb_results": "7"  # Set the number of results to 5 plus an error margin which will be used later in code
             },
         )
         print('Response HTTP Status Code:', response.status_code)
-
+        # def getScreenshots(result, i):
+        #     urls = result.get("url")
+        #     screen = client.get(
+        #         url=urls,
+        #         params={
+        #             "screenshot_full_page": "true",
+        #         },
+        #     )
+        #     for blacklisted_element in blacklist:
+        #         if blacklisted_element in screen.url:
+        #             print("ITEM BLACKLISTED")
+        #             continue #stops code from taking screenshots of these pages, and ensures uses another url, which is provided from the error margin itself
+                
+        #     if screen.status_code == 200:
+        #         with open('screenshot{}.png'.format(i), 'wb') as f:
+        #             i += 1
+        #             f.write(screen.content)
+                    
+        #         print("Image saved")
+        #     else:
+        #         print("Failed to save", screen.status_code) 
+        
         if response.status_code == 200:
             # Parse the JSON content
             data = response.json()
@@ -52,10 +74,10 @@ def save_data():
 
             
             blacklist = ["linkedin.com"]#BLACKLIST, ADD AND REMOVE AS NECESSARY
-            TAKEN_SITE_SCREENSHOTS = 0
 
             # Extract and print the URLs
             for result in data.get("organic_results", []):
+                # Thread(target=getScreenshots(result,i)).start()
                 urls = result.get("url")
                 
                 screen = client.get(
@@ -65,8 +87,7 @@ def save_data():
                     },
                 )
                 for blacklisted_element in blacklist:
-                    if TAKEN_SITE_SCREENSHOTS==5:
-                        break
+                    
                     if blacklisted_element in screen.url:
                         print("ITEM BLACKLISTED")
                         continue #stops code from taking screenshots of these pages, and ensures uses another url, which is provided from the error margin itself
@@ -75,8 +96,8 @@ def save_data():
                     with open('screenshot{}.png'.format(i), 'wb') as f:
                         i += 1
                         f.write(screen.content)
+                        
                     print("Image saved")
-                    TAKEN_SITE_SCREENSHOTS +=1
                 else:
                     print("Failed to save", screen.status_code)
                 
