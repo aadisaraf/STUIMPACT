@@ -96,10 +96,16 @@ def save_data():
                     with open('screenshot{}.png'.format(i), 'wb') as f:
                         i += 1
                         f.write(screen.content)
-                        
-                    print("Image saved")
+
+                    # Extract text from screenshot using pytesseract and PIL
+                    screenshot = Image.open(io.BytesIO(screen.content))
+                    text = pytesseract.image_to_string(screenshot)
+                    screenshot_texts.append(text)
+                    screenshot_links.append('screenshot{}.png'.format(i))
+
+                    print("Image OCR completed")
                 else:
-                    print("Failed to save", screen.status_code)
+                    print("Failed to process OCR", screen.status_code)
                 
         print(finalSearchQuery)
         return jsonify({'message': 'Data received successfully.'}), 200
