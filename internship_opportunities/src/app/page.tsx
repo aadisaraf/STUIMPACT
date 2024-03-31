@@ -1,9 +1,25 @@
 'use client'
-import react, {useState} from 'react'
 import AgeDropdown from '../../components/AgeDropDown.js'
 import InternshipTypeDropdown from '../../components/InternshipTypeDropdown.js'
 import Location from '../../components/Location.js'
+
+import {useState} from 'react'
+import { useSession } from 'next-auth/react'
+import {redirect} from 'next/navigation'
+import UserCard from '../../components/UserCard'
+import { signOut } from 'next-auth/react'
+import Navbar from '../../components/Navbar'
+
 export default function Home() {
+  const { data:session } = useSession({
+    required: true,
+    onUnauthenticated(){
+      redirect('/api/auth/signin?callbackUrl=/')
+    }
+  })
+  const handleSignOut = async () =>{
+    await signOut
+  }
   const [selectedGrade, setSelectedGrade] = useState(null);
   const [selectedInternshipTypes, setSelectedInternshipTypes] = useState([]);
   const [location, setLocation] = useState({
@@ -43,6 +59,11 @@ export default function Home() {
   };
 
   return (
+    <section className="min-h-screen flex flex-col">
+    <main>
+    <Navbar/>
+    </main>
+    <UserCard user = {session?.user} pagetype = {"Client"}/> 
     <main className="flex min-h-screen flex-col items-center justify-between p-24">
       <div className="relative">
         <AgeDropdown setSelectedGrade={setSelectedGrade} />
@@ -66,6 +87,7 @@ export default function Home() {
         </button>
       </div>
     </main>
+    </section>
   );
 }
 
